@@ -10,6 +10,7 @@ import UIKit
 import Accelerate
 
 public class DynamicBlurView: UIView {
+    
     private class BlurLayer: CALayer {
         static let BlurRadiusKey = "blurRadius"
         @NSManaged var blurRadius: CGFloat
@@ -197,7 +198,7 @@ public class DynamicBlurView: UIView {
     private func linkForDisplay() {
         displayLink?.invalidate()
         displayLink = UIScreen.main().displayLink(withTarget: self, selector: DisplayLinkSelector)
-        displayLink?.add(to: RunLoop.main(), forMode: dynamicMode.mode())
+        displayLink?.add(to: RunLoop.main, forMode: RunLoopMode(rawValue: dynamicMode.mode()))
     }
     
     private func setCaptureImage(_ image: UIImage, radius: CGFloat) {
@@ -209,7 +210,7 @@ public class DynamicBlurView: UIView {
             }
         }
         
-        if Thread.current().isMainThread {
+        if Thread.current.isMainThread {
             queue.async(execute: setImage)
         } else {
             setImage()
@@ -252,10 +253,10 @@ public class DynamicBlurView: UIView {
         
         UIGraphicsBeginImageContextWithOptions(bounds.size, true, 1)
         let context = UIGraphicsGetCurrentContext()
-        context!.interpolationQuality = CGInterpolationQuality.none
+        context?.interpolationQuality = CGInterpolationQuality.none
         context?.translate(x: -bounds.origin.x, y: -bounds.origin.y)
         
-        if Thread.current().isMainThread {
+        if Thread.current.isMainThread {
             renderInContext(context)
         } else {
             DispatchQueue.main.sync {
@@ -293,6 +294,7 @@ public class DynamicBlurView: UIView {
 }
 
 public extension UIImage {
+    
     func blurredImage(_ radius: CGFloat, iterations: Int, ratio: CGFloat, blendColor: UIColor?) -> UIImage! {
         if floorf(Float(size.width)) * floorf(Float(size.height)) <= 0.0 || radius <= 0 {
             return self
@@ -332,7 +334,6 @@ public extension UIImage {
             inBuffer.data = outBuffer.data
             outBuffer.data = temp
         }
-        
         
         let colorSpace = imageRef?.colorSpace
         let bitmapInfo = imageRef?.bitmapInfo
